@@ -1,0 +1,40 @@
+name: Try the one-channel pilot
+description: Request a walkthrough using one channel, one campaign and one weekly report.
+title: "[Pilot] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This is a public interest form. Share only details you want visible on GitHub. An issue is an inquiry. There is no charge or subscription when you open one.
+  - type: dropdown
+    id: team
+    attributes:
+      label: What kind of team runs your channel?
+      options:
+        - Creator or educator selling a product
+        - Small agency managing creator channels
+        - In-house marketing team
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Which decision do you need to make after a release?
+      placeholder: "Example — did last week's tutorial bring enough paid signups to cover production?"
+    validations:
+      required: true
+  - type: dropdown
+    id: offer
+    attributes:
+      label: What would you like to try?
+      options:
+        - A free self-hosted walkthrough
+        - Discuss the assisted pilot at USD 29 per channel for one month
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Where did you find Channel Ops?
+      placeholder: GitHub release, a newsletter, or another source

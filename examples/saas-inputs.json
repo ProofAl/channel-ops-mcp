@@ -1,0 +1,17 @@
+{
+  "monthly_price_usd": 19,
+  "refund_percent": 3,
+  "processing_percent": 3,
+  "processing_fixed_usd": 0.3,
+  "compute_storage_usd": 1.2,
+  "model_api_usd": 1.5,
+  "other_service_usd": 0.5,
+  "support_minutes": 10,
+  "loaded_support_hourly_usd": 30,
+  "acquisition_cash_spend_usd": 180,
+  "acquisition_hours": 8,
+  "loaded_acquisition_hourly_usd": 30,
+  "new_paying_channels": 12,
+  "monthly_churn_percent": 5,
+  "monthly_fixed_costs_usd": 300
+}

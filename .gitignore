@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.env
+client_secret*.json
+desktop-client.json
+account.json
+*.sqlite*

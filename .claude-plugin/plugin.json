@@ -1,0 +1,7 @@
+{
+  "name": "channel-ops-mcp",
+  "version": "0.1.0",
+  "description": "Plan YouTube campaigns and PR pitches, test offers, and track which releases bring paid customers.",
+  "author": { "name": "ProofAl" },
+  "keywords": ["youtube", "marketing", "unit-economics", "attribution"]
+}

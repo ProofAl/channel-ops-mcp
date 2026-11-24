@@ -1,0 +1,8 @@
+{
+  "name": "channel-ops",
+  "description": "Tools for measuring YouTube campaigns, paid conversions, and the cost of running a channel.",
+  "owner": { "name": "ProofAl" },
+  "plugins": [
+    { "name": "channel-ops-mcp", "source": "./" }
+  ]
+}

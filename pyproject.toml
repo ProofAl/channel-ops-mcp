@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "channel-ops-mcp"
+version = "0.1.0"
+description = "YouTube editorial workflows, campaign attribution and unit economics for ChatGPT and Claude."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = ["mcp>=1.29.0,<2", "httpx>=0.27.1,<1"]
+license = "MIT"
+authors = [{name = "ProofAl"}]
+
+[project.urls]
+Homepage = "https://github.com/ProofAl/channel-ops-mcp"
+Issues = "https://github.com/ProofAl/channel-ops-mcp/issues"
+
+[project.scripts]
+channel-ops-mcp = "channel_ops.server:main"
+
+[tool.setuptools]
+packages = ["channel_ops"]

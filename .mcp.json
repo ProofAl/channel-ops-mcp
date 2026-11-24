@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "channel-ops": {
+      "type": "stdio",
+      "command": "channel-ops-mcp"
+    }
+  }
+}

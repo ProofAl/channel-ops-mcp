@@ -1,0 +1,18 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.ProofAl/channel-ops-demo",
+  "title": "Channel Ops Demo",
+  "description": "Calculate campaign contribution and draft YouTube UTM links with example inputs.",
+  "repository": {
+    "url": "https://github.com/ProofAl/channel-ops-mcp",
+    "source": "github"
+  },
+  "version": "0.1.0",
+  "websiteUrl": "https://channel-ops-lab.knowingfoxglove4.chatgpt.site",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://channel-ops-lab.knowingfoxglove4.chatgpt.site/demo/mcp"
+    }
+  ]
+}

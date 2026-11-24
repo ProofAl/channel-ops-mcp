@@ -1,0 +1,19 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "channel-ops-mcp",
+  "version": "0.1.0",
+  "description": "Plan YouTube campaigns and PR pitches, test offers, and track which releases bring paid customers.",
+  "author": { "name": "ProofAl" },
+  "keywords": ["youtube", "creator", "channel", "marketing", "campaign", "unit-economics", "attribution"],
+  "extensions": {
+    "com.openai": {
+      "requires_local_executor": true,
+      "interface": {
+        "displayName": "Channel Ops",
+        "shortDescription": "Connect YouTube campaigns to sales and costs.",
+        "developerName": "ProofAl",
+        "category": "Productivity"
+      }
+    }
+  }
+}

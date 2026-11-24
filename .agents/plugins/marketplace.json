@@ -1,0 +1,12 @@
+{
+  "name": "channel-ops",
+  "interface": { "displayName": "Channel Ops" },
+  "plugins": [
+    {
+      "name": "channel-ops-mcp",
+      "source": { "source": "local", "path": "./" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Productivity"
+    }
+  ]
+}

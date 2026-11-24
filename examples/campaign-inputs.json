@@ -1,0 +1,27 @@
+{
+  "production_cash_usd": 15,
+  "production_hours": 2,
+  "loaded_production_hourly_usd": 30,
+  "promotion_cash_usd": 15,
+  "distribution_and_sales_hours": 1,
+  "loaded_distribution_and_sales_hourly_usd": 30,
+  "tools_allocated_usd": 5,
+  "weeks": [
+    {
+      "confirmed_orders": 1,
+      "confirmed_new_customers": 1,
+      "sales_collected_usd": 100,
+      "refunds_usd": 0,
+      "fulfillment_and_fees_usd": 25,
+      "other_net_income_usd": 0
+    },
+    {
+      "confirmed_orders": 1,
+      "confirmed_new_customers": 0,
+      "sales_collected_usd": 100,
+      "refunds_usd": 0,
+      "fulfillment_and_fees_usd": 25,
+      "other_net_income_usd": 0
+    }
+  ]
+}
