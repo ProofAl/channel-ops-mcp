@@ -1,0 +1,41 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "channel-ops-review",
+  "version": "0.1.0",
+  "description": "Reconcile YouTube-attributed sales and production costs to decide whether to repeat a video topic.",
+  "author": { "name": "ProofAl", "url": "https://github.com/ProofAl" },
+  "homepage": "https://github.com/ProofAl/channel-ops-mcp/tree/main/plugins/channel-review",
+  "repository": "https://github.com/ProofAl/channel-ops-mcp",
+  "license": "MIT",
+  "keywords": ["youtube", "creator analytics", "sales attribution", "campaign costs", "video marketing"],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Channel Ops Review",
+        "shortDescription": "Trace sales to videos",
+        "longDescription": "For creators and agencies selling products or services through YouTube. Share aggregate paid orders, refunds and production costs. Reconcile release-specific codes with buyers' reported sources, calculate the contribution supported by the evidence and decide what to film next. Works in the conversation from figures you supply. Supports English and Russian.",
+        "developerName": "ProofAl",
+        "category": "Productivity",
+        "capabilities": [],
+        "websiteURL": "https://github.com/ProofAl/channel-ops-mcp/tree/main/plugins/channel-review",
+        "supportURL": "https://github.com/ProofAl/channel-ops-mcp/issues",
+        "defaultPrompt": [
+          "Did my last tutorial pay for its production and promotion costs?",
+          "Compare tagged sales and customer-reported YouTube sales without double-counting.",
+          "Какая тема окупилась с учётом возвратов и времени команды?"
+        ],
+        "brandColor": "#145C42",
+        "logo": "./assets/channel-review.png",
+        "composerIcon": "./assets/channel-review.png"
+      },
+      "publication": {
+        "translations": {
+          "ru-RU": {
+            "subtitle": "Свяжите ролики с продажами",
+            "description": "Для авторов и агентств, которые продают через YouTube. Укажите сводные данные об оплатах, возвратах и расходах. Сопоставьте продажи по ссылкам роликов с ответами покупателей, учитывая пересечения, и решите, какую тему снять следующей."
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,4 +1,4 @@
-/** Public stateless demo. No bindings, databases, credentials or outbound fetches. */
+/** Stateless public MCP tools and an opt-in first-party discovery survey. */
 const repo = 'https://github.com/ProofAl/channel-ops-mcp';
 const pilot = repo + '/issues/new?template=pilot.yml';
 const modern = '2026-07-28';
@@ -73,22 +73,22 @@ const json = (data, status = 200) => response(JSON.stringify(data), status, 'app
 const rpcError = (id, code, message, status = 200, data) =>
   json({ jsonrpc: '2.0', id, error: { code, message, ...(data && { data }) } }, status);
 
-async function readBody(req) {
-  if (Number(req.headers.get('content-length')) > limit) throw new RangeError();
+async function readText(req, max) {
+  if (Number(req.headers.get('content-length')) > max) throw new RangeError();
   if (!req.body) throw new SyntaxError();
   const reader = req.body.getReader();
-  const buffer = new Uint8Array(limit);
+  const buffer = new Uint8Array(max);
   let length = 0;
   try {
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
-      if (length + value.length > limit) { await reader.cancel(); throw new RangeError(); }
+      if (length + value.length > max) { await reader.cancel(); throw new RangeError(); }
       buffer.set(value, length);
       length += value.length;
     }
   } finally { reader.releaseLock(); }
-  return JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(buffer.subarray(0, length)));
+  return new TextDecoder('utf-8', { fatal: true }).decode(buffer.subarray(0, length));
 }
 function unpackName(header) {
   if (!header?.startsWith('=?base64?') || !header.endsWith('?=')) return header;
@@ -106,7 +106,7 @@ async function handleMcp(req) {
   if (!accept.includes('*/*') && !accept.includes('application/json'))
     return rpcError(null, -32600, 'The server returns application/json.', 406);
   let msg;
-  try { msg = await readBody(req); } catch (error) {
+  try { msg = JSON.parse(await readText(req, limit)); } catch (error) {
     return error instanceof RangeError ? rpcError(null, -32600, 'Request exceeds 16 KiB.', 413)
       : rpcError(null, -32700, 'Expected a single UTF-8 JSON message.', 400);
   }
@@ -182,6 +182,117 @@ const copy = {
   }
 };
 
+const canonical = 'https://channel-ops-lab.knowingfoxglove4.chatgpt.site';
+const feedbackCookie = '__Host-channel-ops-feedback';
+const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+const text = {
+  en: {
+    title: 'YouTube campaign costs and sales | Channel Ops',
+    workflow: 'Download the review for your assistant', guide: 'Use it in a conversation', nav: 'Creator survey', heading: 'What would help with your next release?',
+    intro: 'Think of the last video your team published. Which decision was hardest?',
+    decisions: { attribution: 'Trace a lead who watched, then called or searched for us', topic: 'Choose the next topic worth producing', contribution: 'Check whether sales covered the cost of a video', none: 'Another decision, or none of these' },
+    methods: { spreadsheet: 'Spreadsheet', analytics: 'YouTube or web analytics', crm: 'CRM or sales reports', manual: 'Ask customers directly', no_process: 'No regular process' },
+    roles: { creator: 'Creator or educator', marketing: 'In-house marketing team', agency: 'Agency', other: 'Other' },
+    method: 'How do you handle this today?', role: 'Who do you work with?', optional: 'Optional',
+    send: 'Send my answer', privacy: 'No login. The survey stores your choices, the UTC day and a random receipt hash. A receipt cookie helps avoid repeat answers in this browser. Our survey does not store names, contact details or IP addresses.',
+    saved: 'Your answer has been recorded', savedBody: 'Thank you. Your response helps us decide which workflow to build next.',
+    unavailable: 'The survey could not save a response', unavailableBody: 'Please try again later, or describe your workflow using the public GitHub pilot form.',
+    invalid: 'Check the survey choices', invalidBody: 'Return to the survey and select one of the available decisions.',
+    home: 'Back to Channel Ops', retry: 'Open the survey', pilot: 'Open the public pilot form'
+  },
+  ru: {
+    title: 'Расходы и продажи YouTube-канала | Channel Ops',
+    workflow: 'Скачать разбор для чата', guide: 'Как использовать в обычном чате', nav: 'Опрос для авторов', heading: 'Что помогло бы подготовить следующий выпуск?',
+    intro: 'Вспомните последний ролик вашей команды. Что было труднее всего решить?',
+    decisions: { attribution: 'Понять, какой ролик привёл клиента, который потом позвонил или нашёл нас через поиск', topic: 'Выбрать тему, на которую стоит потратить время съёмки', contribution: 'Посчитать, покрыли ли продажи затраты на выпуск', none: 'Другая задача или ничего из перечисленного' },
+    methods: { spreadsheet: 'Таблица', analytics: 'YouTube или веб-аналитика', crm: 'CRM или отчёты по продажам', manual: 'Спрашиваем клиентов', no_process: 'Пока делаем от случая к случаю' },
+    roles: { creator: 'Автор канала или преподаватель', marketing: 'Отдел маркетинга', agency: 'Агентство', other: 'Другое' },
+    method: 'Как решаете это сейчас?', role: 'В какой команде вы работаете?', optional: 'Необязательно',
+    send: 'Отправить ответ', privacy: 'Можно ответить без регистрации. Сохраним выбранные варианты, день по UTC и хеш случайной квитанции. Файл cookie с квитанцией помогает учесть ответ из этого браузера один раз. В базе опроса нет имён, контактов и IP-адресов.',
+    saved: 'Ответ сохранён', savedBody: 'Спасибо. Ваш ответ поможет выбрать задачу для следующей версии.',
+    unavailable: 'Сохранить ответ не удалось', unavailableBody: 'Попробуйте позже или опишите задачу в публичной форме пилота на GitHub.',
+    invalid: 'Проверьте выбранные варианты', invalidBody: 'Вернитесь к опросу и выберите задачу из списка.',
+    home: 'На главную Channel Ops', retry: 'Перейти к опросу', pilot: 'Открыть публичную форму пилота'
+  }
+};
+
+function survey(lang) {
+  const t = text[lang];
+  function optional(name, title, choices) {
+    return `<label class="select-label">${title}<select name="${name}"><option value="">${t.optional}</option>${Object.entries(choices).map(([k,v]) => `<option value="${k}">${v}</option>`).join('')}</select></label>`;
+  }
+  // A new form token is included in the HTML only. Nothing is persisted until submission.
+  const submission = crypto.randomUUID();
+  return `<section id="survey" class="lower"><div><h2>${t.heading}</h2><p>${t.privacy}</p></div>
+<form class="survey" method="post" action="/feedback?lang=${lang}"><input type="hidden" name="submission" value="${submission}">
+<fieldset><legend>${t.intro}</legend>${Object.entries(t.decisions).map(([k,v]) => `<label class="choice"><input type="radio" name="decision" value="${k}" required><span>${v}</span></label>`).join('')}</fieldset>
+${optional('method',t.method,t.methods)}${optional('role',t.role,t.roles)}
+<button type="submit">${t.send}</button></form></section>`;
+}
+
+function receipt(req) {
+  const value = (req.headers.get('Cookie') || '').split(';').map(s => s.trim())
+    .find(s => s.startsWith(feedbackCookie + '='))?.slice(feedbackCookie.length + 1);
+  return uuid.test(value || '') ? value : null;
+}
+
+async function receiptHash(token) {
+  const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('creator-survey-v1:' + token));
+  return Array.from(new Uint8Array(bytes), b => b.toString(16).padStart(2,'0')).join('');
+}
+
+function notice(lang, status, kind) {
+  const t = text[lang];
+  return response(`<!DOCTYPE html><html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>${t[kind]} | Channel Ops</title><style>${style}</style></head><body><main class="notice"><h1>${t[kind]}</h1><p>${t[kind+'Body']}</p><p><a href="/?lang=${lang}#survey">${kind === 'saved' ? t.home : t.retry}</a> · <a href="${pilot}">${t.pilot}</a></p></main></body></html>`, status, 'text/html; charset=utf-8', { 'Content-Language': lang, 'X-Robots-Tag': 'noindex', 'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; frame-ancestors 'none'" });
+}
+
+function redirect(path, extra = {}) { return response(null, 303, null, { Location: path, ...extra }); }
+
+async function handleFeedback(req, db, lang) {
+  const location = new URL(req.url);
+  if (!['GET','HEAD','POST'].includes(req.method)) return response(null,405,null,{ Allow: 'GET, HEAD, POST' });
+  // No DB writes or votes are created by a status check.
+  if (req.method === 'HEAD') {
+    try {
+      if (!db) throw new Error();
+      await db.prepare('SELECT 1 FROM discovery_answers LIMIT 0').all();
+      return response(null,200,null,{ 'X-Robots-Tag': 'noindex' });
+    } catch { return response(null,503,null); }
+  }
+  const existing = receipt(req);
+  if (req.method === 'GET') {
+    if (!existing) return redirect('/?lang=' + lang + '#survey');
+    try {
+      if (!db) throw new Error();
+      const found = await db.prepare('SELECT 1 AS saved FROM discovery_answers WHERE submission_hash = ?')
+        .bind(await receiptHash(existing)).first();
+      return found ? notice(lang,200,'saved') : redirect('/?lang=' + lang + '#survey');
+    } catch { return notice(lang,503,'unavailable'); }
+  }
+  const site = req.headers.get('sec-fetch-site');
+  if (req.headers.get('origin') !== location.origin || (site && site !== 'same-origin'))
+    return notice(lang,403,'invalid');
+  if (req.headers.get('content-type')?.split(';')[0].trim() !== 'application/x-www-form-urlencoded')
+    return notice(lang,415,'invalid');
+  let form;
+  try { form = new URLSearchParams(await readText(req, 768)); } catch (error) {
+    return notice(lang, error instanceof RangeError ? 413 : 400, 'invalid');
+  }
+  const t = text.en;
+  if ([...form.keys()].some(k => !['submission','decision','method','role'].includes(k) || form.getAll(k).length !== 1) ||
+      !uuid.test(form.get('submission') || '') || !Object.hasOwn(t.decisions,form.get('decision')) ||
+      (form.get('role') && !Object.hasOwn(t.roles,form.get('role'))) ||
+      (form.get('method') && !Object.hasOwn(t.methods,form.get('method')))) return notice(lang,400,'invalid');
+  const token = existing || form.get('submission');
+  try {
+    if (!db) throw new Error();
+    const saved = await db.prepare('INSERT INTO discovery_answers (submission_hash, decision, method, role) VALUES (?, ?, ?, ?) ON CONFLICT(submission_hash) DO NOTHING')
+      .bind(await receiptHash(token), form.get('decision'), form.get('method') || null, form.get('role') || null).run();
+    if (!saved.success) throw new Error();
+  } catch { return notice(lang,503,'unavailable'); }
+  return redirect('/feedback?lang=' + lang, { 'Set-Cookie': `${feedbackCookie}=${token}; Path=/; Max-Age=2592000; HttpOnly; Secure; SameSite=Strict` });
+}
+
 const style = `
 :root{color-scheme:light;--ink:#172922;--muted:#415c50;--green:#145c42;--line:#b8cbbf;--paper:#f9faf5;--mint:#d9edc9}
 *{box-sizing:border-box}html{font-family:Inter,"Segoe UI",Arial,sans-serif;color:var(--ink);background:var(--paper);scroll-behavior:smooth}
@@ -207,10 +318,14 @@ footer{border-bottom:0;border-top:1px solid var(--line)}.error{color:#763814;fon
 :focus-visible{outline:3px solid #204c98;outline-offset:3px}
 @media(max-width:760px){header,.lower{grid-template-columns:1fr}h1{max-width:13ch}header{padding:34px 0}nav,footer{padding:16px 0}.lower{gap:32px}}
 @media(max-width:360px){body{padding:0 12px}label{grid-template-columns:1fr 73px}.row{flex-wrap:wrap}}
+nav div{flex-wrap:wrap;justify-content:flex-end}.survey{background:white;border-color:var(--line)}
+.survey fieldset{border:0;margin:0 0 16px;padding:0}.survey legend{font-size:1.13rem;font-weight:650;margin-bottom:10px}
+.survey .choice{display:flex;justify-content:flex-start;gap:9px;margin:9px 0;cursor:pointer;align-items:baseline}.choice input{accent-color:var(--green);flex:none}
+.survey .select-label{display:grid;grid-template-columns:1fr;gap:4px;margin:12px 0}.survey select{background:#fff;color:var(--ink);padding:8px;max-width:100%;font:inherit}.survey button{margin-top:8px}.notice{padding:clamp(28px,8vw,110px) 0}.notice p{margin:15px 0}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}`;
 
 function browserDemo(calculate) {
-  const form = document.querySelector('form');
+  const form = document.querySelector('form[aria-labelledby="calc"]');
   const out = document.getElementById('result');
   const error = document.getElementById('error');
   const format = new Intl.NumberFormat(document.documentElement.lang, { style: 'currency', currency: 'USD' });
@@ -240,28 +355,34 @@ function landing(lang) {
   const t = copy[lang];
   const inputs = amounts.map((name, i) => `<label>${t.inputs[i]}<input type="number" name="${name}" min="0" max="1000000000" step=".01" required value="${[200, 0, 50, 125][i]}" aria-label="${t.inputs[i]}, USD"></label>`).join('');
   return `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Channel Ops · ${t.title}</title><meta name="description" content="${t.lead}"><style>${style}</style><script src="/demo.js" defer></script></head>
-<body><nav><a class="brand" href="/?lang=${lang}">Channel Ops</a><div><a href="#pilot">${t.nav}</a><a href="${t.href}" hreflang="${lang === 'en' ? 'ru' : 'en'}">${t.other}</a></div></nav>
+<title>${text[lang].title}</title><link rel="canonical" href="${canonical}/${lang === 'ru' ? '?lang=ru' : ''}">
+<link rel="alternate" hreflang="en" href="${canonical}/"><link rel="alternate" hreflang="ru" href="${canonical}/?lang=ru"><link rel="alternate" hreflang="x-default" href="${canonical}/"><meta name="description" content="${t.lead}"><style>${style}</style><script src="/demo.js" defer></script></head>
+<body><nav><a class="brand" href="/?lang=${lang}">Channel Ops</a><div><a href="#survey">${text[lang].nav}</a><a href="#pilot">${t.nav}</a><a href="${t.href}" hreflang="${lang === 'en' ? 'ru' : 'en'}">${t.other}</a></div></nav>
 <main><header><div class="intro"><h1>${t.title}</h1><p>${t.lead}</p></div>
 <form aria-labelledby="calc"><h2 id="calc">${t.heading}</h2><p class="note">${t.hint}</p><div class="fields">${inputs}</div><div class="result"><div>${t.output}<br><small>${t.sample}</small></div>
 <strong id="result" aria-live="polite">$25.00</strong></div><p id="error" role="status" class="error" data-message="${t.calcError}"></p><noscript><small>${t.script}</small></noscript></form></header>
 <div class="lower"><section><h2>${t.ai}</h2><p>${t.how}</p><h3><label for="endpoint">${t.endpoint}</label></h3><div class="row"><input id="endpoint" readonly value="/demo/mcp"><button type="button" id="copy" data-done="${t.copied}">${t.copy}</button></div>
-<h3>${t.ask}</h3><blockquote>${t.prompt}</blockquote><p class="note">${t.shorts}</p></section>
+<h3>${t.ask}</h3><blockquote>${t.prompt}</blockquote><p class="note">${t.shorts}</p><p><a href="${repo}/releases/download/review-v0.1.0/channel-review.zip">${text[lang].workflow}</a> · <a href="${repo}/tree/main/plugins/channel-review">${text[lang].guide}</a></p></section>
 <section id="pilot"><h2>${t.pilot}</h2><p>${t.offer}</p><p>${t.evidence}</p><a class="action" href="${pilot}">${t.cta}</a></section></div>
-</main><footer><span class="brand">Channel Ops</span><a href="${repo}">${t.source} ↗</a></footer></body></html>`;
+${survey(lang)}</main><footer><span class="brand">Channel Ops</span><a href="${repo}">${t.source} ↗</a></footer></body></html>`;
 }
 
 export default {
-  async fetch(req) {
+  async fetch(req, env = {}) {
     const url = new URL(req.url);
+    const lang = url.searchParams.get('lang') === 'ru' ? 'ru' : 'en';
+    if (url.pathname === '/feedback') return handleFeedback(req,env.FEEDBACK,lang);
     if (['/mcp', '/demo/mcp'].includes(url.pathname)) return handleMcp(req);
-    if (!['/', '/demo.js'].includes(url.pathname)) return response('Not found', 404, 'text/plain');
+    if (!['/', '/demo.js', '/robots.txt', '/sitemap.xml'].includes(url.pathname)) return response('Not found', 404, 'text/plain');
     if (req.method !== 'GET' && req.method !== 'HEAD') return response(null, 405, null, { Allow: 'GET, HEAD' });
+    if (url.pathname === '/robots.txt')
+      return response(req.method === 'HEAD' ? null : `User-agent: *\nAllow: /\nDisallow: /mcp\nDisallow: /demo/mcp\nDisallow: /feedback\nSitemap: ${canonical}/sitemap.xml\n`, 200,'text/plain; charset=utf-8');
+    if (url.pathname === '/sitemap.xml')
+      return response(req.method === 'HEAD' ? null : `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${canonical}/</loc></url><url><loc>${canonical}/?lang=ru</loc></url></urlset>`,200,'application/xml; charset=utf-8');
     if (url.pathname === '/demo.js')
       return response(req.method === 'HEAD' ? null : `(${browserDemo.toString()})(${calculateContribution.toString()});`, 200, 'text/javascript; charset=utf-8');
-    const lang = url.searchParams.get('lang') === 'ru' ? 'ru' : 'en';
     return response(req.method === 'HEAD' ? null : landing(lang), 200, 'text/html; charset=utf-8', {
-      'Content-Security-Policy': "default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors https://chatgpt.com https://*.chatgpt.com 'self'",
-      'Content-Language': lang });
+      'Content-Security-Policy': "default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'self'; frame-ancestors https://chatgpt.com https://*.chatgpt.com 'self'",
+      'Referrer-Policy': 'same-origin', 'Content-Language': lang });
   }
 };

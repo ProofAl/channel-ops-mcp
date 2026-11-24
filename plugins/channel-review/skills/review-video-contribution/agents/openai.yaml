@@ -1,0 +1,4 @@
+interface:
+  display_name: "Review Video Contribution"
+  short_description: "Check which videos earned their costs"
+  default_prompt: "Use $review-video-contribution to reconcile my sales sources and decide what to film next."

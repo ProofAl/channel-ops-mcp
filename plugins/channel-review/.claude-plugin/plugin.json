@@ -1,0 +1,7 @@
+{
+  "name": "channel-ops-review",
+  "version": "0.1.0",
+  "description": "Reconcile YouTube sales attribution and production costs in a creator campaign review.",
+  "author": { "name": "ProofAl" },
+  "license": "MIT"
+}

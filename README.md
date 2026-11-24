@@ -37,6 +37,12 @@ Use `channel-ops-mcp` as a local stdio server or install the included native plu
 
 For an owner walkthrough, ask the assistant to list the last three releases, draft a PR placement for one release, and register a measurable offer. Provide sales and cost evidence from your own systems to evaluate the outcome. If the only link is in a shared channel profile, attribute traffic at channel level. External URLs in Shorts descriptions and comments are not clickable. [YouTube link guidance](https://support.google.com/youtube/answer/13748639?hl=en)
 
+## What decision did your last release leave open?
+
+Did a viewer call after searching for your brand? Are you deciding which topic deserves another shoot, or explaining whether the release covered costs? Answer one question in English or Russian. The survey asks for a decision and optional role and current method. It works without a login. [Creator survey](https://channel-ops-lab.knowingfoxglove4.chatgpt.site/#survey)
+
+For an in-chat review using your own aggregate figures, the standalone [Channel Ops Review workflow](plugins/channel-review/) reconciles tagged sales, channel-level self-reports and unknown sources. It fits a weekly editorial meeting. The local owner plugin above remains the route for reading YouTube data or proposing title changes.
+
 ## Early pilot
 
 The code is free to self-host under MIT. We are testing demand for assisted setup and one weekly report at **US$29 per channel for the first month**. A request starts a conversation. Use the public form for non-sensitive information. Customer data, receipts and Google credentials belong on your own machine.
@@ -49,7 +55,7 @@ The first cohort is ten independent creator teams. We will record how many produ
 
 ```shell
 python -m unittest discover -s tests -v
-node --test web/test-worker.mjs
+node --test web/test*.mjs
 ```
 
 The Python tests exercise the local MCP integration and use controlled responses for Google services. The hosted edge worker has its own protocol and calculator tests. This project is independently maintained.
